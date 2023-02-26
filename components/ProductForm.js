@@ -1,9 +1,12 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {formatter} from "../utils/helpers";
 import ProductOptions from "./ProductOptions";
+import {CartContext} from "../context/shopContext";
 
 const ProductForm = ({product}) => {
-    console.log(product)
+
+
+    const { addToCart } = useContext(CartContext)
 
     const allVariantOptions = product.variants.edges?.map(variant => {
         const allOptions = {}
@@ -40,6 +43,17 @@ const ProductForm = ({product}) => {
                 ...prevState, [name]: value
             }
         })
+
+        const selection = {
+            ...selectedOptions,
+            [name]: value
+        }
+
+        allVariantOptions.map(item => {
+            if (JSON.stringify(item.options) === JSON.stringify(selection)) {
+                setSelectedVariant(item)
+            }
+        })
     }
 
     return (
@@ -47,7 +61,7 @@ const ProductForm = ({product}) => {
             <h2 className={'text-2xl font-bold'}>
                 {product.title}
             </h2>
-            <span className={'pb-6'}>
+            <span className={'pb-3'}>
                 {formatter.format(product.variants.edges[0].node.priceV2.amount)}
             </span>
             {product.options.map(({name, values}) => (
@@ -59,7 +73,12 @@ const ProductForm = ({product}) => {
                     setOptions={setOptions}
                 />
             ))}
-            <button className={'bg-black rounded-lg text-white px-2 py-3 hover:bg-gray-800'}>
+            <button
+                className={'m-3 bg-black rounded-lg text-white px-2 py-3 hover:bg-gray-800'}
+                onClick={() => {
+                    addToCart(selectedVariant)
+                }}
+            >
                 Add To Cart
             </button>
         </div>
